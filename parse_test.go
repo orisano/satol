@@ -1,6 +1,7 @@
 package satol
 
 import (
+	"math/rand"
 	"strconv"
 	"testing"
 )
@@ -59,9 +60,6 @@ func TestParse16(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Parse16(tt.args.s); got != tt.want {
-				t.Errorf("Parse16() = %d(%x), want %d", got, got, tt.want)
-			}
 			if got := Parse16GoBits(tt.args.s); got != tt.want {
 				t.Errorf("Parse16GoBits() = %d(%x), want %d", got, got, tt.want)
 			}
@@ -136,9 +134,6 @@ func TestParse8(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Parse8(tt.args.s); got != tt.want {
-				t.Errorf("Parse8() = %d(%x), want %d", got, got, tt.want)
-			}
 			if got := Parse8GoBits(tt.args.s); got != tt.want {
 				t.Errorf("Parse8GoBits() = %d(%x), want %d", got, got, tt.want)
 			}
@@ -217,6 +212,56 @@ func TestParse4(t *testing.T) {
 	}
 }
 
+func BenchmarkParse(b *testing.B) {
+	rng := rand.NewSource(42)
+	data := make([]string, 1000000)
+	for i := range data {
+		rand.Uint64()
+		data[i] = strconv.Itoa(int(rng.Int63()))
+	}
+	b.ResetTimer()
+	result := uint64(0)
+	b.Run("AVX", func(b *testing.B) {
+		var p AVXParser
+		for i := 0; i < b.N; i++ {
+			for _, s := range data {
+				result = p.Parse(s)
+			}
+		}
+	})
+	b.Run("SSE", func(b *testing.B) {
+		var p SSEParser
+		for i := 0; i < b.N; i++ {
+			for _, s := range data {
+				result = p.Parse(s)
+			}
+		}
+	})
+	b.Run("Go", func(b *testing.B) {
+		var p GoParser
+		for i := 0; i < b.N; i++ {
+			for _, s := range data {
+				result = p.Parse(s)
+			}
+		}
+	})
+	b.Run("Naive", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			for _, s := range data {
+				result = ParseNaive(s)
+			}
+		}
+	})
+	b.Run("ParseUint", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			for _, s := range data {
+				result, _ = strconv.ParseUint(s, 10, 64)
+			}
+		}
+	})
+	result++
+}
+
 func BenchmarkParse16(b *testing.B) {
 	result := uint64(0)
 	if hasAVX {
@@ -241,11 +286,6 @@ func BenchmarkParse16(b *testing.B) {
 	b.Run("GoUnrolled", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			result = Parse16GoUnrolled("9999999999999999")
-		}
-	})
-	b.Run("Auto", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
-			result = Parse16("9999999999999999")
 		}
 	})
 	b.Run("Naive", func(b *testing.B) {
@@ -288,11 +328,6 @@ func BenchmarkParse8(b *testing.B) {
 			result = Parse8GoUnrolled("99999999")
 		}
 	})
-	b.Run("Auto", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
-			result = Parse8("99999999")
-		}
-	})
 	b.Run("Naive", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			result = ParseNaive("99999999")
@@ -333,3 +368,28 @@ func BenchmarkParse4(b *testing.B) {
 	result++
 }
 
+func BenchmarkParse3(b *testing.B) {
+	result := uint64(0)
+	b.Run("GoUnrolled", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			result = parse3GoUnrolled(0, "9")
+			result = parse3GoUnrolled(0, "99")
+			result = parse3GoUnrolled(0, "999")
+		}
+	})
+	b.Run("Naive", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			result = ParseNaive("9")
+			result = ParseNaive("99")
+			result = ParseNaive("999")
+		}
+	})
+	b.Run("ParseUint", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			result, _ = strconv.ParseUint("9", 10, 64)
+			result, _ = strconv.ParseUint("99", 10, 64)
+			result, _ = strconv.ParseUint("999", 10, 64)
+		}
+	})
+	result++
+}

@@ -11,9 +11,112 @@ import (
 var hasAVX bool
 var hasSSE42 bool
 
+type UintParser interface {
+	Parse(s string) uint64
+}
+
+var Parser UintParser = GoParser{}
+
 func init() {
 	hasAVX = cpuid.CPU.AVX()
 	hasSSE42 = cpuid.CPU.SSE42()
+
+	if hasAVX {
+		Parser = AVXParser{}
+	} else if hasSSE42 {
+		Parser = SSEParser{}
+	}
+}
+
+type AVXParser struct{}
+
+func (AVXParser) Available() bool {
+	return hasAVX
+}
+
+func (AVXParser) Parse(s string) uint64 {
+	sum := uint64(0)
+	if len(s) >= 16 {
+		sum = Parse16AVX(s)
+		s = s[16:]
+	}
+	if len(s) >= 8 {
+		sum *= 100000000
+		sum += Parse8AVX(s)
+		s = s[8:]
+	}
+	if len(s) >= 4 {
+		sum *= 10000
+		sum += Parse4GoUnrolled(s)
+		s = s[4:]
+	}
+	if len(s) == 0 {
+		return sum
+	} else {
+		return parse3GoUnrolled(sum, s)
+	}
+}
+
+type SSEParser struct{}
+
+func (SSEParser) Available() bool {
+	return hasSSE42
+}
+
+func (SSEParser) Parse(s string) uint64 {
+	sum := uint64(0)
+	if len(s) >= 16 {
+		sum = Parse16SSE(s)
+		s = s[16:]
+	}
+	if len(s) >= 8 {
+		sum *= 100000000
+		sum += Parse8SSE(s)
+		s = s[8:]
+	}
+	if len(s) >= 4 {
+		sum *= 10000
+		sum += Parse4GoUnrolled(s)
+		s = s[4:]
+	}
+	if len(s) == 0 {
+		return sum
+	} else {
+		return parse3GoUnrolled(sum, s)
+	}
+}
+
+type GoParser struct{}
+
+func (GoParser) Available() bool {
+	return true
+}
+
+func (GoParser) Parse(s string) uint64 {
+	sum := uint64(0)
+	if len(s) >= 16 {
+		sum = Parse16GoBits(s)
+		s = s[16:]
+	}
+	if len(s) >= 8 {
+		sum *= 100000000
+		sum += Parse8GoBits(s)
+		s = s[8:]
+	}
+	if len(s) >= 4 {
+		sum *= 10000
+		sum += Parse4GoUnrolled(s)
+		s = s[4:]
+	}
+	if len(s) == 0 {
+		return sum
+	} else {
+		return parse3GoUnrolled(sum, s)
+	}
+}
+
+func Parse(s string) uint64 {
+	return Parser.Parse(s)
 }
 
 func ParseNaive(s string) uint64 {
@@ -22,26 +125,6 @@ func ParseNaive(s string) uint64 {
 		sum = sum*10 + uint64(c-'0')
 	}
 	return sum
-}
-
-func Parse16(s string) uint64 {
-	switch {
-	case hasAVX:
-		return Parse16AVX(s)
-	case hasSSE42:
-		return Parse16SSE(s)
-	default:
-		return Parse16GoBits(s)
-	}
-}
-
-func Parse8(s string) uint64 {
-	switch {
-	case hasAVX:
-		return Parse8AVX(s)
-	default:
-		return Parse8GoBits(s)
-	}
 }
 
 func Parse16GoBits(s string) uint64 {
@@ -128,6 +211,18 @@ func convert4Go(chunk uint32) uint64 {
 	lowerDigits = (chunk & 0x00ff0000) >> 16
 	upperDigits = (chunk & 0x000000ff) * 100
 	return uint64(lowerDigits + upperDigits)
+}
+
+func parse3GoUnrolled(sum uint64, s string) uint64 {
+	sum = sum*10 + uint64(s[0]-'0')
+	if len(s) == 1 {
+		return sum
+	}
+	sum = sum*10 + uint64(s[1]-'0')
+	if len(s) == 2 {
+		return sum
+	}
+	return sum*10 + uint64(s[2]-'0')
 }
 
 func s2b(s string) (b []byte) {
