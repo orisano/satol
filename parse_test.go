@@ -215,106 +215,98 @@ func TestParse4(t *testing.T) {
 }
 
 func BenchmarkParse16(b *testing.B) {
+	result := uint64(0)
 	if hasAVX {
 		b.Run("AVX", func(b *testing.B) {
-			sum := uint64(0)
 			for i := 0; i < b.N; i++ {
-				sum += Parse16AVX("9999999999999999")
+				result = Parse16AVX("9999999999999999")
 			}
 		})
 	}
 	if hasSSE42 {
 		b.Run("SSE42", func(b *testing.B) {
-			sum := uint64(0)
 			for i := 0; i < b.N; i++ {
-				sum += Parse16SSE("9999999999999999")
+				result = Parse16SSE("9999999999999999")
 			}
 		})
 	}
 	b.Run("GoBits", func(b *testing.B) {
-		sum := uint64(0)
 		for i := 0; i < b.N; i++ {
-			sum += Parse16GoBits("9999999999999999")
+			result = Parse16GoBits("9999999999999999")
 		}
 	})
 	b.Run("Auto", func(b *testing.B) {
-		sum := uint64(0)
 		for i := 0; i < b.N; i++ {
-			sum += Parse16("9999999999999999")
+			result = Parse16("9999999999999999")
 		}
 	})
 	b.Run("ParseUint", func(b *testing.B) {
-		sum := uint64(0)
 		for i := 0; i < b.N; i++ {
 			x, _ := strconv.ParseUint("9999999999999999", 10, 64)
-			sum += x
+			result = x
 		}
 	})
+	result++
 }
 
 func BenchmarkParse8(b *testing.B) {
+	result := uint64(0)
 	if hasAVX {
 		b.Run("AVX", func(b *testing.B) {
-			sum := uint64(0)
 			for i := 0; i < b.N; i++ {
-				sum += Parse8AVX("99999999")
+				result = Parse8AVX("99999999")
 			}
 		})
 	}
 	if hasSSE42 {
 		b.Run("SSE42", func(b *testing.B) {
-			sum := uint64(0)
 			for i := 0; i < b.N; i++ {
-				sum += Parse8SSE("99999999")
+				result = Parse8SSE("99999999")
 			}
 		})
 	}
 	b.Run("GoBits", func(b *testing.B) {
-		sum := uint64(0)
 		for i := 0; i < b.N; i++ {
-			sum += Parse8GoBits("99999999")
+			result = Parse8GoBits("99999999")
 		}
 	})
 	b.Run("GoUnrolled", func(b *testing.B) {
-		sum := uint64(0)
 		for i := 0; i < b.N; i++ {
-			sum += Parse8GoUnrolled("99999999")
+			result = Parse8GoUnrolled("99999999")
 		}
 	})
 	b.Run("Auto", func(b *testing.B) {
-		sum := uint64(0)
 		for i := 0; i < b.N; i++ {
-			sum += Parse8("99999999")
+			result = Parse8("99999999")
 		}
 	})
 	b.Run("ParseUint", func(b *testing.B) {
-		sum := uint64(0)
 		for i := 0; i < b.N; i++ {
 			x, _ := strconv.ParseUint("99999999", 10, 64)
-			sum += x
+			result = x
 		}
 	})
+	result++
 }
 
 func BenchmarkParse4(b *testing.B) {
+	result := uint64(0)
 	b.Run("GoBits", func(b *testing.B) {
-		sum := uint64(0)
 		for i := 0; i < b.N; i++ {
-			sum += Parse4GoBits("9999")
+			result = Parse4GoBits("9999")
 		}
 	})
 	b.Run("GoUnrolled", func(b *testing.B) {
-		sum := uint64(0)
 		for i := 0; i < b.N; i++ {
-			sum += Parse4GoUnrolled("9999")
+			result = Parse4GoUnrolled("9999")
 		}
 	})
 	b.Run("ParseUint", func(b *testing.B) {
-		sum := uint64(0)
 		for i := 0; i < b.N; i++ {
 			x, _ := strconv.ParseUint("9999", 10, 64)
-			sum += x
+			result = x
 		}
 	})
+	result++
 }
 
