@@ -248,6 +248,11 @@ func BenchmarkParse16(b *testing.B) {
 			result = Parse16("9999999999999999")
 		}
 	})
+	b.Run("Naive", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			result = ParseNaive("9999999999999999")
+		}
+	})
 	b.Run("ParseUint", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			x, _ := strconv.ParseUint("9999999999999999", 10, 64)
@@ -288,6 +293,11 @@ func BenchmarkParse8(b *testing.B) {
 			result = Parse8("99999999")
 		}
 	})
+	b.Run("Naive", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			result = ParseNaive("99999999")
+		}
+	})
 	b.Run("ParseUint", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			x, _ := strconv.ParseUint("99999999", 10, 64)
@@ -307,6 +317,11 @@ func BenchmarkParse4(b *testing.B) {
 	b.Run("GoUnrolled", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			result = Parse4GoUnrolled("9999")
+		}
+	})
+	b.Run("Naive", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			result = ParseNaive("9999")
 		}
 	})
 	b.Run("ParseUint", func(b *testing.B) {

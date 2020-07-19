@@ -16,6 +16,14 @@ func init() {
 	hasSSE42 = cpuid.CPU.SSE42()
 }
 
+func ParseNaive(s string) uint64 {
+	sum := uint64(0)
+	for _, c := range s {
+		sum = sum*10 + uint64(c-'0')
+	}
+	return sum
+}
+
 func Parse16(s string) uint64 {
 	switch {
 	case hasAVX:
