@@ -119,7 +119,6 @@ func convert4Go(chunk uint32) uint64 {
 
 	lowerDigits = (chunk & 0x00ff0000) >> 16
 	upperDigits = (chunk & 0x000000ff) * 100
-	chunk = lowerDigits + upperDigits
 	return uint64(lowerDigits + upperDigits)
 }
 
