@@ -65,6 +65,9 @@ func TestParse16(t *testing.T) {
 			if got := Parse16GoBits(tt.args.s); got != tt.want {
 				t.Errorf("Parse16GoBits() = %d(%x), want %d", got, got, tt.want)
 			}
+			if got := Parse16GoUnrolled(tt.args.s); got != tt.want {
+				t.Errorf("Parse16GoUnrolled() = %d(%x), want %d", got, got, tt.want)
+			}
 			if hasAVX {
 				if got := Parse16AVX(tt.args.s); got != tt.want {
 					t.Errorf("Parse16AVX() = %d(%x), want %d", got, got, tt.want)
@@ -233,6 +236,11 @@ func BenchmarkParse16(b *testing.B) {
 	b.Run("GoBits", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			result = Parse16GoBits("9999999999999999")
+		}
+	})
+	b.Run("GoUnrolled", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			result = Parse16GoUnrolled("9999999999999999")
 		}
 	})
 	b.Run("Auto", func(b *testing.B) {

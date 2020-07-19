@@ -43,6 +43,27 @@ func Parse16GoBits(s string) uint64 {
 	return convert8Go(high)*100000000 + convert8Go(low)
 }
 
+func Parse16GoUnrolled(s string) uint64 {
+	sum := uint64(0)
+	sum += uint64(s[15]-'0') * 1
+	sum += uint64(s[14]-'0') * 10
+	sum += uint64(s[13]-'0') * 100
+	sum += uint64(s[12]-'0') * 1000
+	sum += uint64(s[11]-'0') * 10000
+	sum += uint64(s[10]-'0') * 100000
+	sum += uint64(s[9]-'0') * 1000000
+	sum += uint64(s[8]-'0') * 10000000
+	sum += uint64(s[7]-'0') * 100000000
+	sum += uint64(s[6]-'0') * 1000000000
+	sum += uint64(s[5]-'0') * 10000000000
+	sum += uint64(s[4]-'0') * 100000000000
+	sum += uint64(s[3]-'0') * 1000000000000
+	sum += uint64(s[2]-'0') * 10000000000000
+	sum += uint64(s[1]-'0') * 100000000000000
+	sum += uint64(s[0]-'0') * 1000000000000000
+	return sum
+}
+
 func Parse8GoBits(s string) uint64 {
 	b := s2b(s)[:8]
 	chunk := binary.LittleEndian.Uint64(b[:8])
@@ -51,29 +72,14 @@ func Parse8GoBits(s string) uint64 {
 
 func Parse8GoUnrolled(s string) uint64 {
 	sum := uint64(0)
-	sum += uint64(s[7] - '0')
-	sum += uint64(s[6] - '0') * 10
-	sum += uint64(s[5] - '0') * 100
-	sum += uint64(s[4] - '0') * 1000
-	sum += uint64(s[3] - '0') * 10000
-	sum += uint64(s[2] - '0') * 100000
-	sum += uint64(s[1] - '0') * 1000000
-	sum += uint64(s[0] - '0') * 10000000
-	return sum
-}
-
-func Parse4GoBits(s string) uint64 {
-	b := s2b(s)[:4]
-	chunk := binary.LittleEndian.Uint32(b[0:4])
-	return convert4Go(chunk)
-}
-
-func Parse4GoUnrolled(s string) uint64 {
-	sum := uint64(0)
-	sum += uint64(s[3] - '0')
-	sum += uint64(s[2] - '0') * 10
-	sum += uint64(s[1] - '0') * 100
-	sum += uint64(s[0] - '0') * 1000
+	sum += uint64(s[7]-'0') * 1
+	sum += uint64(s[6]-'0') * 10
+	sum += uint64(s[5]-'0') * 100
+	sum += uint64(s[4]-'0') * 1000
+	sum += uint64(s[3]-'0') * 10000
+	sum += uint64(s[2]-'0') * 100000
+	sum += uint64(s[1]-'0') * 1000000
+	sum += uint64(s[0]-'0') * 10000000
 	return sum
 }
 
@@ -89,6 +95,21 @@ func convert8Go(chunk uint64) uint64 {
 	lowerDigits = (chunk & 0x0000ffff00000000) >> 32
 	upperDigits = (chunk & 0x000000000000ffff) * 10000
 	return lowerDigits + upperDigits
+}
+
+func Parse4GoBits(s string) uint64 {
+	b := s2b(s)[:4]
+	chunk := binary.LittleEndian.Uint32(b[0:4])
+	return convert4Go(chunk)
+}
+
+func Parse4GoUnrolled(s string) uint64 {
+	sum := uint64(0)
+	sum += uint64(s[3]-'0') * 1
+	sum += uint64(s[2]-'0') * 10
+	sum += uint64(s[1]-'0') * 100
+	sum += uint64(s[0]-'0') * 1000
+	return sum
 }
 
 func convert4Go(chunk uint32) uint64 {
