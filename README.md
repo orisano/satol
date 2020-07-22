@@ -1,4 +1,6 @@
 # satol
+![Test](https://github.com/orisano/satol/workflows/Test/badge.svg)
+
 satol is a fast integer parser.
 inspired by this article. https://kholdstare.github.io/technical/2020/05/26/faster-integer-parsing.html
 
