@@ -4,11 +4,13 @@ package main
 
 import (
 	. "github.com/mmcloughlin/avo/build"
+	"github.com/mmcloughlin/avo/buildtags"
 	. "github.com/mmcloughlin/avo/operand"
 	. "github.com/mmcloughlin/avo/reg"
 )
 
 func main() {
+	Constraint(buildtags.Term("amd64"))
 	zeros := GLOBL("zeros", RODATA|NOPTR)
 	DATA(0, U64(0xcfcfcfcfcfcfcfd0))
 	DATA(8, U64(0xcfcfcfcfcfcfcfd0))
